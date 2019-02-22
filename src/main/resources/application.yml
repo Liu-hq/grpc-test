@@ -30,7 +30,7 @@ spring:
       hibernate:
         dialect : org.hibernate.dialect.MySQL5Dialect
   application:
-    name: grpc-test
+    name: grpc-test-server
   redis:
     pool:
       max-idle: 100
