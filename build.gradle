@@ -1,125 +1,76 @@
-plugins {
-    // Provide convenience executables for trying out the examples.
-    id 'application'
-    // ASSUMES GRADLE 2.12 OR HIGHER. Use plugin version 0.7.5 with earlier gradle versions
-    id 'com.google.protobuf' version '0.8.5'
-    // Generate IntelliJ IDEA's .idea & .iml project files
-    id 'idea'
+buildscript {
+    ext {
+        springBootVersion = '2.1.2.RELEASE'
+    }
+    repositories {
+        mavenLocal()
+        maven { url "http://192.168.0.224:8081/repository/maven-public/" }
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
+
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 
 repositories {
-    maven { // The google mirror is less flaky than mavenCentral()
-        url "https://maven-central.storage-download.googleapis.com/repos/central/data/"
-    }
     mavenLocal()
+    maven { url "http://192.168.0.224:8081/repository/maven-public/" }
+    maven { url "http://repo.spring.io/libs-snapshot" }
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+    mavenCentral()
+}
+ext {
+    springCloudVersion = 'Finchley.RELEASE'
 }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
-// IMPORTANT: You probably want the non-SNAPSHOT version of gRPC. Make sure you
-// are looking at a tagged version of the example and not "master"!
-
-// Feel free to delete the comment at the next line. It is just for safely
-// updating the version in our release process.
-def grpcVersion = '1.18.0' // CURRENT_GRPC_VERSION
-def protobufVersion = '3.5.1'
-def protocVersion = '3.5.1-1'
 
 dependencies {
-    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    implementation "io.grpc:grpc-stub:${grpcVersion}"
-    compileOnly "javax.annotation:javax.annotation-api:1.2"
 
-    // examples/advanced need this for JsonFormat
-    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '2.1.0.RELEASE'
 
-    runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
+//    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-eureka', version: '2.1.0.RELEASE'
+//    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix', version: '1.4.6.RELEASE'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile "org.springframework.boot:spring-boot-starter-actuator"
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.boot:spring-boot-starter-tomcat"
+    runtime 'mysql:mysql-connector-java:5.1.29'
+    runtime "org.apache.tomcat:tomcat-jdbc"
+    compile "org.hibernate:hibernate-core"
+    compile "org.hibernate:hibernate-ehcache"
+    compile "org.springframework.boot:spring-boot-starter-data-jpa"
+    compile "org.springframework.boot:spring-boot-starter-data-redis"
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.51'
+    compile group: 'com.alibaba', name: 'druid', version: '1.1.11'
+    compile('org.springframework.kafka:spring-kafka')
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.51'
+    compile group: 'io.grpc', name: 'grpc-netty', version: '1.18.0'
 
-    testImplementation "io.grpc:grpc-testing:${grpcVersion}"
-    testImplementation "junit:junit:4.12"
-    testImplementation "org.mockito:mockito-core:1.9.5"
+    compile 'net.devh:grpc-server-spring-boot-starter:2.2.1.RELEASE'
+    compile group: 'grpc.test.api', name: 'grpc-test-api', version: '0.1'
+
 }
 
-protobuf {
-    protoc { path = "/usr/local/bin/protoc" }
-    plugins {
-        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+
+//ext {
+//    set "tomcat.version", "8.5.5"
+//}
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
-    generateProtoTasks {
-        all()*.plugins { grpc {} }
-    }
-}
-
-// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
-sourceSets {
-    main {
-        java {
-            srcDirs 'build/generated/source/proto/main/grpc'
-            srcDirs 'build/generated/source/proto/main/java'
-        }
-    }
-}
-
-startScripts.enabled = false
-
-//task routeGuideServer(type: CreateStartScripts) {
-//    mainClassName = 'io.grpc.examples.routeguide.RouteGuideServer'
-//    applicationName = 'route-guide-server'
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-//
-//task routeGuideClient(type: CreateStartScripts) {
-//    mainClassName = 'io.grpc.examples.routeguide.RouteGuideClient'
-//    applicationName = 'route-guide-client'
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-//
-//task helloWorldServer(type: CreateStartScripts) {
-//    mainClassName = 'io.grpc.examples.helloworld.HelloWorldServer'
-//    applicationName = 'hello-world-server'
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-//
-//task helloWorldClient(type: CreateStartScripts) {
-//    mainClassName = 'io.grpc.examples.helloworld.HelloWorldClient'
-//    applicationName = 'hello-world-client'
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-//
-//task authServer(type: CreateStartScripts) {
-//    mainClassName = 'io.grpc.examples.authentication.AuthServer'
-//    applicationName = 'auth-server'
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-//
-//task authClient(type: CreateStartScripts) {
-//    mainClassName = 'io.grpc.examples.authentication.AuthClient'
-//    applicationName = 'auth-client'
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-//
-//task compressingHelloWorldClient(type: CreateStartScripts) {
-//    mainClassName = 'io.grpc.examples.experimental.CompressingHelloWorldClient'
-//    applicationName = 'compressing-hello-world-client'
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-
-applicationDistribution.into('bin') {
-//    from(routeGuideServer)
-//    from(routeGuideClient)
-//    from(helloWorldServer)
-//    from(helloWorldClient)
-//    from(authServer)
-//    from(authClient)
-//    from(compressingHelloWorldClient)
-    fileMode = 0755
 }
 
