@@ -15,6 +15,19 @@ import java.util.Map;
  */
 public class ReturnMessage {
 
+
+    public static Map<String, String> jsonData(String result, String data, String errcode, String msg) {
+        Map<String, String> retMap = new HashMap<>();
+        retMap.put("result", result);
+        retMap.put("data", data);
+        retMap.put("errcode", errcode);
+        if (!StringUtils.isEmpty(msg)) {
+            retMap.put("msg", msg);
+        }
+
+        return retMap;
+    }
+
     public static Map<String, Object> jsonData(boolean result, Object data, Object errcode, Object msg) {
         Map<String, Object> retMap = new HashMap<>();
         retMap.put("result", result);
